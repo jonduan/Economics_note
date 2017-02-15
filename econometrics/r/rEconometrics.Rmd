@@ -1,0 +1,695 @@
+---
+title: "R Introduction for Econometrics"
+author: "Jon Duan"
+date: "February 9, 2017"
+output:
+  slidy_presentation:
+    footer: Copyright (c) 2017, UVic
+    highlight: pygments
+    duration: 45
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+Introduction  {.bigger}
+====================
+
+
+Try R in Browser
+====================
+
+
+To actually become familiar with R, you may want to work through a short tutorial. The recommended are:
+
+* [try R](http://tryr.codeschool.com) 
+
+* [Introduction to R](https://www.datacamp.com/courses/free-introduction-to-r)  works in web browser
+
+* [swirl](http://swirlstats.com) works through the R console.
+
+* [Short-R-Intro](https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf)
+
+* [RStudio101](http://dss.princeton.edu/training/RStudio101.pdf)
+
+* [r/seminars](http://www.ats.ucla.edu/stat/r/seminars/intro.htm)
+
+* [MarinStatsLectures](https://www.youtube.com/channel/UCaNIxVagLhqupvUiDK01Mgg)
+
+* [LearnR](https://www.youtube.com/user/TheLearnR)
+
+Learn Econometrics in R
+============================================
+
+- [Applied Econometrics with R](https://eeecon.uibk.ac.at/~zeileis/teaching/AER/)
+  AER author teaching econometrics with R.  
+  
+- [Using R for Introductory Econometrics](http://www.urfie.net/) R companions for Wooldridge's textbook.
+
+- [An Introduction to R, by W. N. Venables, D. M. Smith and the R Core Team, 2015.](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
+
+- [Introduction_to_R](http://www3.nd.edu/~mclark19/learn/Introduction_to_R.pdf) 
+
+- [EconometricsInR](https://cran.r-project.org/doc/contrib/Farnsworth-EconometricsInR.pdf)
+
+  
+- [Econometrics Using R](http://link.springer.com/book/10.1007%2F978-0-387-77318-6) Free for students at UVic
+
+
+Motivation  {.bigger}
+=====================
+
+
+<div align="center">
+```{r, , echo=FALSE, out.width = "700px"}
+knitr::include_graphics("https://www.analyticsvidhya.com/wp-content/uploads/2016/02/rstudio.jpg")
+#http://stackoverflow.com/questions/15625990/how-to-set-size-for-local-image-using-knitr-for-markdown/36057971#36057971
+```
+</div>
+
+
+Motivation: Load Data and Plot for Phillips Curve
+========================================================
+
+```{r}
+library(foreign)
+phillips <- read.dta('http://www.urfie.net/downloads/phillips.dta')
+plot(phillips$year,phillips$inf,type="l",
+     main="Inflation",xlab="Time",ylab="Inflation")
+```
+
+
+
+ Movtivation: Multiple Regression Analysis (Chapter 3)
+==========================
+
+```{r}
+gpa1 <- read.dta('http://fmwww.bc.edu/ec-p/data/wooldridge/gpa1.dta')
+lm.1 <- lm(colGPA ~ hsGPA + ACT, data=gpa1)
+summary(lm.1)
+```
+
+
+# Basic R  {.bigger}
+
+
+<div align="center",style="width:300px; height=200px">
+![Basic R](https://static1.squarespace.com/static/51361f2fe4b0f24e710af7ae/t/547ca7cde4b00987aeeb8888/1417455565543/?format=300w)
+</div>
+
+
+Basic R: R as a Calculator
+============================================
+
+```{r}
+1+1
+5*(4-1)^2
+sqrt( log(10) )
+```
+
+
+Basic R: Install Packages
+============================================
+This R script downloads and installs all packages used at some point.http://www.urfie.net/read/mobile/index.html#p=20
+
+It needs to be run once for each computer/user only
+```{r eval= FALSE}
+install.packages("AER")
+install.packages("car")
+install.packages("censReg")
+install.packages("dummies")
+install.packages("dynlm")
+install.packages("bbmle")
+install.packages("ggplot2")
+```
+
+
+# Object in R  {.bigger}
+
+
+Object in R: show objecct
+==========================
+
+
+```{r}
+s.1 <- summary(lm.1); names(s.1)
+s.1$coefficients
+```
+
+# Data structure in R  {.bigger}
+
+
+
+
+Data in R: Dataframe
+=======================
+
+```{r}
+year  <- c(2008,2009,2010,2011,2012,2013) # Define one x vector for all:
+product1<-c(0,3,6,9,7,8); product2<-c(1,2,3,5,9,6); product3<-c(2,4,4,2,3,2) # vector
+sales_mat <- cbind(product1,product2,product3) # Define a matrix
+rownames(sales_mat) <- year 
+(sales <- as.data.frame(sales_mat)) # Create a data frame and display it:
+```
+
+
+Data in R: Subset dataframe
+===============
+
+```{r}
+# Full data frame (from Data-frames.R, has to be run first)
+sales[3,] # row
+sales[,3] # column
+# or
+sales$product3
+# Subset: all years in which sales of product 3 were >=3
+subset(sales, product3>=3)
+# or
+sales[sales$product3>=3,]
+```
+
+Data in R: Information of dataframe
+==================
+
+```{r}
+head(sales,2)
+tail(sales,2)
+str(sales)
+length(sales)
+dim(sales)
+```
+
+# Plot in R  {.bigger}
+
+```{r echo=FALSE,out.width=c('500px', '300px'), fig.show='hold'}
+boxplot(1:10)
+plot(rnorm(10))
+```
+
+
+Plot in R: Plot With Detailed Annotation
+=================
+
+http://www.cyclismo.org/tutorial/R/plotting.html
+
+```{r}
+x<-c(1,3,4,7,8,9); y<-c(0,3,6,9,7,8);
+plot(x,y, main="Example for an Outlier") # base plot
+points(8,1, pch = 19, col = "red",  cex = 1.5) # extra object
+abline(a=0.31,b=0.97,lty=2,lwd=2) # extra line
+text(7,2,"outlier",pos=3) # add text annotation
+arrows(7,2,8,1,length=0.15)
+```
+
+
+
+# Statistics in R  {.bigger}
+
+Statistics Inference in R:  Regression with Results
+=========================
+
+```{r}
+data(women) # Load a built-in data called ‘women’
+fit = lm(weight ~ height, women) # Run a regression analysis
+summary(fit)
+```
+
+
+Statistics Inference in R: Diagnostic Plots 
+=========================
+
+
+```{r}
+par(mfrow=c(2,2)) # Change the panel layout to 2 x 2
+plot(fit)
+par(mfrow=c(1,1)) # Change back to 1 x 1
+```
+
+
+
+Statistics Inference in R: Hypothesis Test
+===========================
+
+```{r}
+library(AER)
+coeftest(fit)
+## a z test (instead of a t test) can be performed by
+## a different covariance matrix can be also used:
+## either supplied as a function
+coeftest(fit, df = Inf, vcov = vcovHC) ## store test results as a list "testres"
+```
+
+Statistics Inference in R: Hypothesis Test
+===========================
+
+```{r}
+linearHypothesis(fit, "height=1", white.adjust="hc0")
+#anova(fit)#Anova(fit)
+```
+
+
+Statistics Inference in R: Hypothesis Test
+===========================
+```{r}
+mrwdata <- read.dta("https://github.com/davidrpugh/econometrics-labs/raw/master/lab-6/mrw1992.dta")
+
+mrwdata$invest=mrwdata$igdp 
+
+mrwdata$workpop=mrwdata$popgrowth
+
+mrw_model_1 <- I(log(gdp85) - log(gdp60)) ~ log(gdp60) +
+  log(invest/100) + log(workpop/100 + 0.05) + log(school/100)
+
+mrw_lm <- lm(mrw_model_1, data = mrwdata)
+#coeftest(mrw_lm) # need library(AER)
+
+linearHypothesis(mrw_lm, "log(invest/100)+log(workpop/100 + 0.05)=1")
+```
+
+
+
+Statistics Inference in R: Confidence Interval
+==========================
+
+```{r}
+library("AER") #install.packages(c("AER", "car", "lme4"))
+library(foreign); 
+lm.1 <- lm(colGPA ~ hsGPA + ACT, data=gpa1)
+confint(lm.1,level=.90) # 10% confidence
+confint(lm.1,level=.95) # 5% confidence
+#coefficients(lm.1)[2]
+#vcov(lm.1)[2,2]
+```
+
+Statistics Inference in R: Confidence Interval
+==========================
+```{r}
+library(TeachingDemos)
+conf.level = 0.95
+seed = 100
+ci.examp(mean.sim = lm.1$coefficients[2], sd = vcov(lm.1)[2,2], n = 25, reps = 50, conf.level = 0.95,
+         method = "z", lower.conf = (1 - conf.level)/2,
+         upper.conf = 1 - (1 - conf.level)/2)
+```
+
+
+
+
+Statistics Inference in R: F test for restricted model
+=========================
+
+```{r}
+crime1 <- read.dta("http://fmwww.bc.edu/ec-p/data/wooldridge/crime1.dta")
+lm.1 <- lm(narr86 ~ pcnv + ptime86 + qemp86,data=crime1)
+# F test
+lm.2 <- lm(narr86 ~ pcnv + ptime86 + qemp86 + avgsen + tottime,data=crime1)
+anova(lm.1,lm.2)
+```
+
+
+
+Statistics Inference in R: F test for restricted model
+=========================
+
+
+```{r}
+linearHypothesis(lm.2, c("avgsen=0","tottime=0"))
+
+```
+
+
+Statistics Inference in R: F test for restricted model
+=========================
+
+
+```{r}
+confidenceEllipse(lm.2, which.coef=c("avgsen","tottime"), col="red",
+                    xlim=c(-.05,0.05), ylim=c(-.05,0.05))
+## we can add an additional point on the graph using the points() function
+
+points(x=0, y=0, col="blue", pch=19, cex=1.5)
+```
+
+
+
+
+# Programming in R  {.bigger}
+
+![](http://prg.is.titech.ac.jp/wp-content/uploads/2013/09/prg-banner-201309.jpg)
+
+Programming in R:  Writing your own functions
+============================
+
+```{r}
+fun1 = function(arg1, arg2){
+  w = arg1 ^ 2
+  return(arg2 + w)
+}
+fun1(arg1 = 3, arg2 = 5)
+```
+
+
+
+Control flow in R: For-loop
+==================
+
+```{r}
+h = seq(from=1, to=8)
+s = c()
+for(i in 2:10){
+  s[i] = h[i] * 10
+}
+s
+```
+
+Control flow in R: If-statement
+===============
+
+```{r}
+w = 3
+if( w < 5 ){
+  d=2
+  }else if( w  < 8){
+  d=10
+  }else{
+  d = 15
+}
+d
+```
+
+# MLE in R  {.bigger}
+
+MLE by Hand in R 
+=========================
+https://www.r-bloggers.com/doing-maximum-likelihood-estimation-by-hand-in-r/
+
+
+```{r}
+p.parameter <- 0.8 # Bernoulli distribution parameter p
+sequence <- rbinom(n=10,size =  1, p.parameter) #sample from Bernoulli distribution by setting size = 1 in binomial distribution 
+```
+
+
+
+
+```{r}
+likelihood <- function(sequence, p.parameter)
+{
+  likelihood <- 1
+ 
+  for (i in 1:length(sequence))
+  {
+    if (sequence[i] == 1)
+    {
+      likelihood <- likelihood * p.parameter
+    }
+    else
+    {
+      likelihood <- likelihood * (1 - p.parameter)
+    }
+  }
+ 
+  return(likelihood)
+}
+```
+
+
+MLE by Hand in R: Likelihood curve
+=========================
+```{r}
+possible.p <- seq(0, 1, by = 0.001)
+
+library('ggplot2')
+qplot(possible.p,
+      sapply(possible.p, function (p) {likelihood(sequence, p)}),
+      geom = 'line',
+      main = 'Likelihood as a Function of P',
+      xlab = 'P',
+      ylab = 'Likelihood')
+```
+
+
+
+
+MLE by Hand in R: solve the optimization problem
+===============================
+
+```{r}
+(mle.results <- optimize(function(p) {likelihood(sequence, p)},
+                        interval = c(0, 1),
+                        maximum = TRUE))
+```
+
+
+
+
+MLE by Hand in R: 
+===============================
+
+```{r}
+xvec <- c(2,5,3,7,-3,-2,0) # or some other numbers
+
+#then define a function (which is negative of the log lik) 
+
+fn <- function(theta) { sum ( 0.5*(xvec - theta[1])^2/theta[2] + 0.5* log(theta[2]) ) } 
+
+# c(0,1) is the initial value, starting points
+nlm(fn, theta <- c(0,1), hessian=TRUE) 
+
+#or 
+optim(theta <- c(0,1), fn, hessian=TRUE)
+```
+
+
+
+MLE in R: the bbmle package 
+===============================
+https://cran.r-project.org/web/packages/bbmle/index.html
+
+https://www.r-bloggers.com/fitting-a-model-by-maximum-likelihood/
+
+```{r}
+# DGP regression with normal error  
+set.seed(1001)
+N <- 100
+x <- runif(N)
+y <- 5 * x + 3 + rnorm(N)
+```
+
+
+Plot of Data
+==========================
+
+```{r}
+plot(x, y)
+abline(fit, col = "red")
+```
+
+OLS: regression with normal error  
+================================
+
+```{r}
+fit <- lm(y ~ x)
+summary(fit)
+```
+
+
+
+
+Likelihood function example for normal error
+=========================
+```{r}
+LL <- function(beta0, beta1, mu, sigma) {
+    # Find residuals
+    #
+    R = y - x * beta1 - beta0
+    #
+    # Calculate the likelihood for the residuals (with mu and sigma as parameters)
+    #
+    R = suppressWarnings(dnorm(R, mu, sigma))
+    #
+    # Sum the log likelihoods for all of the data points
+    #
+    -sum(log(R))
+}
+```
+
+## MLE for regression
+
+```{r}
+library(bbmle)
+ 
+fit <- mle2(LL, start = list(beta0 = 3, beta1 = 1, mu = 0, sigma = 1))
+summary(fit)
+```
+
+
+# Simulation in R  {.bigger}
+
+<div align="center">
+![](https://cdn2.iconfinder.com/data/icons/virtual-reality-1/500/VR_13-512.png)
+</div>
+
+Simulation in R: Probability Distributions
+=========================
+
+| name     | description                     |
+|----------|---------------------------------|
+| dname( ) | density or probability function |
+| pname( ) | cumulative density function     |
+| qname( ) | quantile function               |
+| rname( ) | random deviates                 |
+
+```{r}
+pnorm(27.4, mean=50, sd=20)
+qnorm(0.95, mean=100, sd=15)
+dbinom(27, size=100, prob=0.25)
+```
+
+
+
+
+
+
+
+
+
+Simulation in R: random number generator
+=======================
+
+```{r}
+# Sample from a standard normal RV with sample size n=5:
+rnorm(5)
+# Set the seed of the random number generator and take two samples:
+set.seed(6254137)
+rnorm(5)
+# Sample from a binomial RV with sample size n=10:
+sample <- rbinom(10,1,0.5)
+sample
+```
+
+Simulation in R: Probability Plots
+=========================
+
+```{r , eval = FALSE}
+# Display the Student's t distributions with various degrees of freedom and compare to the normal distribution
+x <- seq(-4, 4, length=100);hx <- dnorm(x);degf <- c(1, 3, 8, 30)
+colors <- c("red", "blue", "darkgreen", "gold", "black");labels <- c("df=1", "df=3", "df=8", "df=30", "normal")
+
+plot(x, hx, type="l", lty=2, xlab="x value",
+  ylab="Density", main="Comparison of t Distributions")
+
+for (i in 1:4){
+  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])
+}
+
+legend("topright", inset=.05, title="Distributions", labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)
+```
+
+Simulation in R: Probability Plots
+===========================
+
+```{r ,echo=FALSE}
+# Display the Student's t distributions with various degrees of freedom and compare to the normal distribution
+x <- seq(-4, 4, length=100);hx <- dnorm(x);degf <- c(1, 3, 8, 30)
+colors <- c("red", "blue", "darkgreen", "gold", "black");labels <- c("df=1", "df=3", "df=8", "df=30", "normal")
+
+plot(x, hx, type="l", lty=2, xlab="x value",
+  ylab="Density", main="Comparison of t Distributions")
+
+for (i in 1:4){
+  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])
+}
+
+legend("topright", inset=.05, title="Distributions",labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)
+```
+
+
+Simulation in R: Probability Plots
+===========================
+
+```
+curve( dnorm(x,0,1), -10, 10, lwd=1, lty=1)
+curve( dnorm(x,0,2),add=TRUE, lwd=2, lty=2)
+curve( dnorm(x,0,3),add=TRUE, lwd=3, lty=3)
+# Add the legend with greek sigma
+legend("topleft",expression(sigma==1,sigma==2,sigma==3),lwd=1:3,lty=1:3)
+# Add the text with the formula, centered at x=6 and y=0.3
+text(6,.3,expression(f(x)==frac(1,sqrt(2*pi)*sigma)*e^{-frac(x^2,2*sigma^2)}))
+
+```
+
+Simulation in R: Probability Plots
+===========================
+
+```{r, echo=FALSE}
+curve( dnorm(x,0,1), -10, 10, lwd=1, lty=1)
+curve( dnorm(x,0,2),add=TRUE, lwd=2, lty=2)
+curve( dnorm(x,0,3),add=TRUE, lwd=3, lty=3)
+# Add the legend with greek sigma
+legend("topleft",expression(sigma==1,sigma==2,sigma==3),lwd=1:3,lty=1:3)
+# Add the text with the formula, centered at x=6 and y=0.3
+text(6,.3,expression(f(x)==frac(1,sqrt(2*pi)*sigma)*e^{-frac(x^2,2*sigma^2)}))
+
+```
+
+
+
+Simulation in R: Monte Carlo Simulation
+==============================
+
+
+```{r}
+# Set the random seed
+set.seed(123456)
+
+# initialize ybar to a vector of length r=10000 to later store results:
+ybar <- numeric(10000)
+
+# repeat 10000 times:
+for(j in 1:10000) {
+  # Draw a sample and store the sample mean in pos. j=1,2,... of ybar: 
+  sample <- rnorm(100,10,2)
+  ybar[j] <- mean(sample)
+}
+```
+
+Simulation in R: 
+==========================
+
+```{r}
+ybar[1:20] # The first 20 of 10000 estimates:
+mean(ybar) # Simulated mean:
+var(ybar) # Simulated variance:
+
+```
+
+
+
+Simulation in R: Simlation in R
+==========================
+
+```{r}
+plot(density(ybar)) # Simulated density:
+curve( dnorm(x,10,sqrt(.04)), add=TRUE,lty=2)
+```
+
+
+
+
+
+Bayesian in R
+==================
+
+beliefs: 
+
+P(p < 0.310) = 0.5; P(p < 0.350) = 0.8
+
+a beta prior density that matches beliefs.
+```{r}
+#install.packages("LearnBayes")
+library(LearnBayes)
+beta.select(list(p=.5,x=.31), list(p=.8,x=.35))
+```
+
