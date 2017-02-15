@@ -1,0 +1,45 @@
+<style>
+    #notebook h1 {
+        font-size: 200%;
+        text-align: center;
+    }
+    #notebook h2 {
+        font-size: 150%;
+        text-align: center;
+    }
+    #notebook h3 {
+        font-size: 150%;
+        margin-bottom: 10px;
+    }
+    #notebook div.cell {
+        width: 100%;
+    }
+    #notebook h3.bank {
+        margin-bottom: 20px;
+    }
+    #notebook p {
+        font-size: 150%;
+    }
+    #notebook ul {
+        font-size: 150%;
+    }
+    #notebook ol {
+        font-size: 150%;
+    }
+    #notebook li {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+    #notebook h1.title-slide {
+        font-size: 250%;
+        text-align: center;
+    }
+    #notebook h2.title-slide {
+        padding-top: 100px;
+        padding-bottom: 100px;
+    }
+    #notebook img.title-slide {
+        height: 150px;
+        margin: auto;
+    }
+</style>
