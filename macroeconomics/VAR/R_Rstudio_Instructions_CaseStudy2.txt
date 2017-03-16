@@ -1,0 +1,68 @@
+Instructions for replicating fm_casestudy2 in R/Rstudio
+
+
+
+1.	If R and RStudio are installed on your computer, proceed to step 2.  
+	Otherwise, install R and RStudio on your computer from the following links:
+		http://www.r-project.org/
+		http://www.rstudio.com/ide/download/desktop
+
+
+2. 	Create a project directory "fm_casestudy2" on your computer and
+	copy/download/transfer the following files from the OCW website to that directory:
+	  (R script files)
+		fm_casestudy_0_InstallOrLoadLibraries.r
+		fm_casestudy_fx_1.r
+		fm_casestudy_2_rcode.r
+	  (txt data file)
+		fred_fxrates.txt
+
+
+3.	Open the R-Studio application, and from the top bar of commands 
+		a) select Project, then Create Project, then
+			Create Project from Existing Directory
+		b) with the browser that appears, navigate to select the directory
+			"fm_casestudy2"
+		   
+
+4.	The R-Studio application opens with a 4-panel display.
+		The lower left panel is a console for typing R commands directly or viewing
+		output from executed R commands
+
+		The lower right panel has tabs [Files|Plots|Packages|Help]. 
+		
+		In the lower right panel, select the Files tab and open the 3  R script files			
+		from 2, by clicking on the file names, successively
+
+		The files will open in separate tabs in the top left panel.
+
+5.	Go to the first file in the top left panel:
+		fm_casestudy_0_InstallOrLoadLibraries.r
+	Execute the script file by either
+			pressing the 'Source' button at the top tool bar of the file
+			highlighting commands in the file and typing Control-Enter
+	NOTE: the beginning of the script file has the variable
+		ind.install0<-FALSE
+	If this is the first time R-studio is using the specific packages in these scripts,
+	you will need to change this to ind.install0<-TRUE. 
+
+	Go to the file in the top left panel:
+		fm_casestudy_fx1.r
+	Execute this script file in the same manner.
+
+	This  file is self documenting explaining
+		installing/loading R packages
+		basic R commands
+		downloading financial data from the internet
+		graphing the financial data
+		saving an R workspace with data objects
+
+
+
+6. 	Go to the third file in the top left panel:
+		fm_casestudy_2_rcode.r
+	Execute this script file in the same manner as the previous two files.
+	This code replicates the r commands in the pdf file classsnotes_casestudy2.pdf
+
+	
+	
