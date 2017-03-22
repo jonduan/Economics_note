@@ -1,0 +1,200 @@
+---
+title: "SW CHAP11 IV R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+#==============================================================================
+#   Data Analysis Tutorial: Instrumental variable regression
+#==============================================================================
+
+  # Original: Bill Sundstrom 4/17/2015
+  # Current version: Bill Sundstrom 6/29/2016
+  
+  # Description: IV regression, examples from S&W ch. 12
+
+#==============================================================================
+#   1. Settings, packages, and options (run these every R session)
+#==============================================================================
+
+  # Clear the working space
+  rm(list = ls())
+  
+  # Set working directory (edit for YOUR econ 42 folder)
+  setwd("/Users/wsundstrom/Google Drive/Econ173/data")
+  
+  # Load the packages (must have been installed: see tutorial_2)
+  # install.packages(c("plm", "ivpack"))
+    library(AER)
+    library(sandwich)
+    library(lmtest)
+    library(car)
+    library(stargazer)
+    library(ggplot2)
+    library(openintro)
+    library(OIdata)
+    library(gdata)
+    library(doBy)
+    library(plm)
+    library(ivpack)
+  
+  # turn off scientific notation except for big numbers
+  options(scipen = 9)
+  # set larger font size for qplot (default is 12)
+  theme_set(theme_gray(base_size = 18))
+  
+  ### functions for correct SEs in regression tables
+  
+  # function to calculate corrected SEs for OLS regression 
+  cse = function(reg) {
+      rob = sqrt(diag(vcovHC(reg, type = "HC1")))
+      return(rob)
+      }
+  
+  # clustered SEs, clustered on "group"... could also cluster on "time" 
+  # compute Stata-like degrees of freedom adjustment for number of groups
+  # See http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
+  
+  clse = function(reg) { 
+    # index(reg, "id") returns the id or entity variable vector 
+    G = length(unique(index(reg,"id")))
+    N = length(index(reg,"id"))
+    dfa = (G/(G - 1))   # note Bluhm multiplies this by finite-sample df adjustment
+    rob = sqrt(diag(dfa*vcovHC(reg, method="arellano", type = "HC1", 
+                               cluster = "group")))
+    return(rob)
+  }
+  
+  # corrected SEs for IV regressions... slight difference from S&W method
+  ivse = function(reg) {
+      rob = robust.se(reg)[,2]
+      return(rob)
+      }
+  
+
+#==============================================================================
+#   2. Data section 
+#==============================================================================
+
+### IV example from AER package
+
+### Data
+
+  data("CigarettesSW", package = "AER")
+  # Following S&W, we use just 1995 data for now
+  cigs = subset(CigarettesSW, year==1995)
+
+### New variables
+
+  # deflate by CPI to get real values
+  cigs$rprice = cigs$price/cigs$cpi
+  cigs$rincome = (cigs$income/cigs$population)/cigs$cpi 
+  
+  # log values are used in the regressions
+  # note that you could create these on the fly within the regression commands
+  cigs$lprice = log(cigs$rprice)
+  cigs$lquant = log(cigs$packs)
+  cigs$lincome = log(cigs$rincome)
+  
+  # tdiff = the real tax on cigarettes arising just 
+  # from general sales tax, used as instrument in SW textbook
+  cigs$tdiff = (cigs$taxs - cigs$tax)/cigs$cpi
+
+  # summary statistics
+  stargazer(cigs, type="text", median=TRUE,
+              digits=2, title="Cigarette data 1995")
+
+
+#==============================================================================
+#   3. Analysis: IV regressions
+#==============================================================================
+
+### First, out of curiosity, look at OLS: This we would expect to be biased
+  
+  ols = lm(lquant ~ lprice, data = cigs)  
+  stargazer(ols,  
+              se=list(cse(ols)),
+              title="OLS Regression", type="text", 
+              df=FALSE, digits=5)
+
+### IV regression
+
+  # Let's take a look at the first-stage regression (12.9)
+  # Regress X on Z (and any other exogenous variables W if we had them)
+  # As an instrument we use tdiff 
+  
+  first1 = lm(lprice ~ tdiff, data = cigs)
+  stargazer(first1,  
+            se=list(cse(first1)),
+            title="First-stage Regression", type="text", 
+            df=FALSE, digits=5)
+  
+  # Reduced form: Regress Y on Z (and any other exogenous variables W if we had them)
+  
+  reduced = lm(lquant ~ tdiff, data = cigs)
+  stargazer(reduced,  
+            se=list(cse(reduced)),
+            title="Reduced-form Regression", type="text", 
+            df=FALSE, digits=5)
+  
+### Now run the full ivreg: replicating SW equation (12.10) 
+    # the general set-up is ivreg(Y ~ X + W | W + Z, ... )
+    # where Y is outcome variable, X is endogenous var(s)
+    # W is any exogenous vars not including instruments, and Z is the instruments
+  
+  # In our example:
+  iv1 = ivreg(lquant ~ lprice | tdiff , data = cigs)
+    
+  # note: use the function ivse for corrected SEs in IV
+  stargazer(iv1, 
+            se=list(ivse(iv1)),
+            title="IV Regression", type="text", 
+            df=FALSE, digits=5)
+  
+  # We can add controls and another instrument (12.16)
+    
+  iv2 = ivreg(lquant ~ lprice + lincome | lincome + tdiff + I(tax/cpi),
+              data = cigs)
+    
+  stargazer(ols, first1, iv1, iv2, 
+            se=list(cse(ols), cse(first1), ivse(iv1), ivse(iv2)),
+            title="IV Regression", type="text", 
+            df=FALSE, digits=5) 
+
+### IV diagnostics
+  # In the following summary command, several diagnostic tests are performed:
+    # Weak instruments: Test on instruments in first stage. We hope to reject.
+    # Wu-Hausman: tests null that OLS is consistent. If we do not reject, OLS is probably better.   
+    # Sargan test: uses overidentifying restrictions to test instrument exogeneity.
+      # Sargan requires that we have more instruments (Z) than endogenous variables (X)
+    # vcov=sandwich gives heterosk-robust SEs
+  
+  summary(iv2, vcov = sandwich, diagnostics = TRUE)
+
+### Run 2SLS with a weak instrument
+
+  # We can artificially "weaken" the IV (tdiff) by adding random noise
+  set.seed(111)
+  cigs$tdiffweak <- cigs$tdiff + 3*rnorm(length(cigs$tdiff))
+  
+  iv1wfirst <- lm(lprice ~ tdiffweak , data = cigs)
+  iv1w <- ivreg(lquant ~ lprice | tdiffweak , data = cigs)
+  
+  stargazer(iv1wfirst, iv1w, 
+            se=list(cse(iv1wfirst), ivse(iv1w)),
+            title="IV Regression", type="text", 
+            df=FALSE, digits=5)
+  
+  summary(iv1w, vcov = sandwich, diagnostics = TRUE)
+  summary(iv2, vcov = sandwich, diagnostics = TRUE)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
