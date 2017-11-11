@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+# R script accompanying quasi-concave, concave etc note
+
+if(!require(rgl)) install.packages('rgl')
+require(rgl)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+# setup data
+nx <- 50	# points into x direction
+ny <- 50	# points into y
+
+x <- seq(0,1,length=50)
+y <- seq(0,1,length=50)
+
+df <- expand.grid(x=x,y=y)
+```
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+# DGPs
+cobb.douglas <- function(x,a,b) return( x[1]^a * x[2]^b )
+```
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+```{r}
+# plotting data
+cd1 <- apply(df,1,cobb.douglas,a=0.25,b=0.25)
+cd2 <- apply(df,1,cobb.douglas,a=2,b=2)
+```
+
+```{r}
+# put in a matrix
+cd.heights1 <- matrix(cd1,nrow=nx,ncol=ny)
+cd.heights2 <- matrix(cd2,nrow=nx,ncol=ny)
+```
+
+```{r}
+# concave cobb douglas
+open3d()
+surface3d(x,y,cd.heights1,color="red",alpha=0.8)
+axes3d(labels=FALSE,tick=FALSE)
+title3d("concave cobb douglas")
+```
+
