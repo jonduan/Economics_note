@@ -1,0 +1,63 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}C:\Dell2017files\files\courses\546\spring 2018\labs\546lab1.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}15 Sep 2017, 09:56:26
+
+{com}. regress inlf age age2 educ logwr nclt3
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}     2,339
+{txt}{hline 13}{c +}{hline 34}   F(5, 2333)      = {res} 18768.06
+{txt}       Model {c |} {res} 548.401044         5  109.680209   {txt}Prob > F        ={res}    0.0000
+{txt}    Residual {c |} {res} 13.6340134     2,333  .005843983   {txt}R-squared       ={res}    0.9757
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}    0.9757
+{txt}       Total {c |} {res} 562.035058     2,338  .240391385   {txt}Root MSE        =   {res} .07645
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}        inlf{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 9}age {c |}{col 14}{res}{space 2}  -.00516{col 26}{space 2} .0013325{col 37}{space 1}   -3.87{col 46}{space 3}0.000{col 54}{space 4}-.0077729{col 67}{space 3}-.0025471
+{txt}{space 8}age2 {c |}{col 14}{res}{space 2} .0000461{col 26}{space 2} .0000167{col 37}{space 1}    2.76{col 46}{space 3}0.006{col 54}{space 4} .0000133{col 67}{space 3} .0000789
+{txt}{space 8}educ {c |}{col 14}{res}{space 2}-.0111654{col 26}{space 2}  .000468{col 37}{space 1}  -23.86{col 46}{space 3}0.000{col 54}{space 4}-.0120832{col 67}{space 3}-.0102477
+{txt}{space 7}logwr {c |}{col 14}{res}{space 2} .1718996{col 26}{space 2} .0006085{col 37}{space 1}  282.52{col 46}{space 3}0.000{col 54}{space 4} .1707065{col 67}{space 3} .1730928
+{txt}{space 7}nclt3 {c |}{col 14}{res}{space 2}-.0121799{col 26}{space 2} .0040027{col 37}{space 1}   -3.04{col 46}{space 3}0.002{col 54}{space 4}-.0200291{col 67}{space 3}-.0043306
+{txt}{space 7}_cons {c |}{col 14}{res}{space 2}   .20774{col 26}{space 2} .0257536{col 37}{space 1}    8.07{col 46}{space 3}0.000{col 54}{space 4} .1572376{col 67}{space 3} .2582424
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}
+{com}. regress inlf age age2 educ logwr nclt3, vce(hc3)
+
+{txt}Linear regression                               Number of obs     = {res}     2,339
+                                                {txt}F(5, 2333)        =  {res} 30590.30
+                                                {txt}Prob > F          = {res}    0.0000
+                                                {txt}R-squared         = {res}    0.9757
+                                                {txt}Root MSE          =    {res} .07645
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 14}{c |}{col 26}  Robust HC3
+{col 1}        inlf{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 9}age {c |}{col 14}{res}{space 2}  -.00516{col 26}{space 2} .0013128{col 37}{space 1}   -3.93{col 46}{space 3}0.000{col 54}{space 4}-.0077344{col 67}{space 3}-.0025857
+{txt}{space 8}age2 {c |}{col 14}{res}{space 2} .0000461{col 26}{space 2} .0000167{col 37}{space 1}    2.76{col 46}{space 3}0.006{col 54}{space 4} .0000133{col 67}{space 3} .0000789
+{txt}{space 8}educ {c |}{col 14}{res}{space 2}-.0111654{col 26}{space 2} .0005928{col 37}{space 1}  -18.83{col 46}{space 3}0.000{col 54}{space 4} -.012328{col 67}{space 3}-.0100029
+{txt}{space 7}logwr {c |}{col 14}{res}{space 2} .1718996{col 26}{space 2} .0005344{col 37}{space 1}  321.67{col 46}{space 3}0.000{col 54}{space 4} .1708517{col 67}{space 3} .1729476
+{txt}{space 7}nclt3 {c |}{col 14}{res}{space 2}-.0121799{col 26}{space 2} .0037393{col 37}{space 1}   -3.26{col 46}{space 3}0.001{col 54}{space 4}-.0195127{col 67}{space 3}-.0048471
+{txt}{space 7}_cons {c |}{col 14}{res}{space 2}   .20774{col 26}{space 2} .0253598{col 37}{space 1}    8.19{col 46}{space 3}0.000{col 54}{space 4} .1580099{col 67}{space 3} .2574701
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}
+{com}. predict yfit, xb
+
+. su yfit
+
+{txt}    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 8}yfit {c |}{res}      2,339    .5985464    .4843138  -.1338555   1.356686
+
+{com}. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}C:\Dell2017files\files\courses\546\spring 2018\labs\546lab1.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}15 Sep 2017, 17:00:56
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}
