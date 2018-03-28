@@ -7,7 +7,7 @@
 
 ## 02. Villaverde'S RBC model
 
-## 03. Johannes Pfeifer's  Guide to Estimation of DSGE Models
+## 03. Another example
 
 ## Reference
  - [RBC model](https://github.com/mcreel/Econometrics/tree/master/Examples/RBC)
