@@ -1,5 +1,5 @@
 # Estimation for RBC model
-
+http://www.dynare.org/documentation-and-support/examples
 ## 1. rbc.mod
   - Simple RBC model.
 
