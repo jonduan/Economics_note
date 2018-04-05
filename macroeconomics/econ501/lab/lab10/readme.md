@@ -7,7 +7,7 @@ Continued RBC model
 
 
 
-### 1. RBC model from Jesus Fernandez-Villaverde
+### 1. RBC model from Jesus Fernandez-Villaverde
 
 log utility function for goods and leisure
 
@@ -23,9 +23,12 @@ CRRA(constant relative risk aversion) utility function for goods and log utility
 
 https://github.com/JohannesPfeifer/DSGE_mod/tree/master/RBC_baseline
 
-### 4. RBC With Oil shock
+### 4. Cariblation for parameters
 
-https://sites.google.com/site/marcozzi73/home/teaching/econ-501-macroeconomic-analysis
+https://www.bankofcanada.ca/2001/12/working-paper-2001-26/
+
+
+https://www3.nd.edu/~esims1/stylized_facts_rbc_sp17.pdf
 
 ### 5. Matlab handout from Johannes Pfeifer
 
