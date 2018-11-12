@@ -1,0 +1,403 @@
+---
+title: "Canadian census data"
+output: html_notebook
+---
+
+Access to Canadian census data through the CensusMapper API
+
+https://mountainmath.github.io/cancensus/reference/get_census.html
+
+
+Source
+Census data and boundary geographies are reproduced and distributed on an "as is" basis with the permission of Statistics Canada (Statistics Canada 2006; 2011; 2016).
+
+Details
+get_census_geometry is a convenience function that retrieves only Census geography boundaries.
+
+For help selecting regions and vectors, see list_census_regions and list_census_vectors, or check out the interactive selection tool at https://censusmapper.ca/api.
+
+Examples
+
+```{r}
+# install.packages("cancensus")
+library(cancensus)
+```
+
+
+
+```{r}
+cancensus.cache_path = 'G:\\project\\data'
+```
+
+
+```{r}
+# Query the API for data on dwellings in Vancouver, at the census subdivision
+# level:
+# NOT RUN {
+census_data <- get_census(dataset='CA16', regions=list(CMA="59933"),
+                          vectors=c("v_CA16_408","v_CA16_409","v_CA16_410"),
+                          level='CSD')
+```
+
+
+
+```{r}
+
+
+# Query the API for data on dwellings in Vancouver, at the census subdivision
+# level, and return the associated geography files in \code{sf} format:
+census_data <- get_census(dataset='CA16', regions=list(CMA="59933"),
+                          vectors=c("v_CA16_408","v_CA16_409","v_CA16_410"),
+                          level='CSD', geo_format = "sf")
+
+# Make the same query, but return geography in \code{sp} format:
+census_data <- get_census(dataset='CA16', regions=list(CMA="59933"),
+                          vectors=c("v_CA16_408","v_CA16_409","v_CA16_410"),
+                          level='CSD', geo_format = "sf")
+
+# Make the same query, but this time drop descriptive vector names:
+census_data <- get_census(dataset='CA16', regions=list(CMA="59933"),
+                          vectors=c("v_CA16_408","v_CA16_409","v_CA16_410"),
+                          level='CSD', geo_format = "sf", labels="short")
+
+# Get details for truncated vectors:
+label_vectors(census_data)
+# }# NOT RUN {
+# Query the API for census subdivision boundary geometry within Vancouver.
+vc_csds <- get_census_geometry(dataset='CA16', regions=list(CMA="59933"),
+                               level='CSD', geo_format = "sf")
+# }
+```
+
+
+## StatCan API's Discovered
+
+https://www.mytinyshinys.com/2017/08/09/statcanapi/
+
+
+
+Let’s load the libraries and see what is available for the all indicators option
+
+
+
+```{r}
+library(httr)
+library(jsonlite)
+library(listviewer)
+library(tidyverse)
+
+
+library(stringr)
+library(plotly)
+```
+
+
+The listviewer package, an htmlwidget from the ubiquitous Kent Russell and others, provides a great way to explore lists
+
+
+
+```{r}
+url <- "http://www.statcan.gc.ca/sites/json/ind-all.json"
+response <-  GET(url)
+
+
+parsed <- fromJSON(content(response, "text"), simplifyVector = FALSE)
+jsonedit(parsed)
+```
+
+
+If you drill down “results > indicators > 0 > title > en” you can see the title of one of the more than thousand indicators. I believe they get added consecutively to the top but at the time of writing the first one was
+let’s see what we can output from this list. 
+
+
+
+```{r}
+
+# start deeper into the nested list
+ind_list <- parsed$results$indicators
+
+# Now use purrr to create atomic vectors
+
+registry_number <- map_chr(ind_list, "registry_number")
+indicator_number <- map_chr(ind_list, "indicator_number")
+geo_code <- map_chr(ind_list, "geo_code")
+source <- map_chr(ind_list, "source")
+themes <- map_chr(ind_list, "themes")
+release_date <- map_chr(ind_list, "release_date")
+
+## For those where we need to go down a further level we can use a vector
+## either numbered
+title <- map_chr(ind_list, c(4, 1))
+#or text
+refper <- map_chr(ind_list, c("refper", "en"))
+value <- map_chr(ind_list, c("value", "en"))
+daily_url <- map_chr(ind_list, c("daily_url", "en"))
+daily_title <- map_chr(ind_list, c("daily_title", "en"))
+
+## combine into a data.frame
+l <-
+  list(
+    registry_number = registry_number,
+    indicator_number = indicator_number,
+    geo_code = geo_code,
+    source = source,
+    themes = themes,
+    release_date = release_date,
+    title = title ,
+    refper = refper,
+    value = value,
+    daily_url = daily_url,
+    daily_title = daily_title
+  )
+
+indices.df <- as_tibble(l)
+
+#and display in a table with selected columns
+indices.df %>%
+  select(geo_code,source,themes,title,value) %>% 
+  DT::datatable(width=600,
+    class = 'compact stripe hover row-border order-column',
+    rownames = FALSE,
+    options = list(
+      paging = TRUE,
+      searching = TRUE,
+      info = FALSE
+    )
+  )
+```
+
+
+
+
+```{r}
+ind_list[[1]]
+```
+
+
+```{r}
+head(indices.df)
+```
+
+You can search for an item of interest e.g try “Potato” and you can see that there is one entry which appears to show 344,884 acres of Potatoes were planted in Canada this year, more than enough to cover Phoenix’s city limits
+
+Looking back at the listviewer we can see that two of the table columns geo_code and themes appear to have equivalent raw data. Let’s tabulize them as well. It’s easier the second time through. For any Francophiles, just swap in the French alternative
+
+
+
+
+
+
+```{r}
+geo_list <- parsed$results$geo
+
+geo_code <- map_chr(geo_list, "geo_code")
+geo_name <- map_chr(geo_list, c(2,1))
+
+
+l <-
+  list(
+    geo_code=geo_code,
+    geo_name=geo_name
+    )
+
+geo.df <- as_tibble(l)
+
+geo.df %>%
+  DT::datatable(
+    class = 'compact stripe hover row-border order-column',
+    rownames = FALSE,
+    options = list(
+      paging = TRUE,
+      searching = TRUE,
+      info = FALSE
+    )
+  )
+```
+
+
+```{r}
+## similar for themes - probably a map_df alternative
+
+theme_list <- parsed$results$themes_en
+
+
+
+theme_code <- map_chr(theme_list, 1)
+theme_name <- map_chr(theme_list, 2)
+
+
+l <-
+  list(
+   theme_code=theme_code,
+    theme_name=theme_name
+    )
+
+theme.df <- as_tibble(l)
+
+theme.df %>%
+  DT::datatable(
+    class = 'compact stripe hover row-border order-column',
+    rownames = FALSE,
+    options = list(
+      paging = TRUE,
+      searching = TRUE,
+      info = FALSE
+    )
+  )
+```
+
+we can now link the geo data.frames to make the tabe more meaningful
+
+
+```{r}
+indices.df %>% 
+  left_join(geo.df) %>% 
+  select(title,refper,geo_name,themes,value,source)%>%
+                         DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = TRUE,info=FALSE))
+```
+
+Type in ‘one-person’ and you will see that the Proportion of one-person households ranges by province from 18.9% in Nunavut to 33.3% in Quebec
+
+Now lets search for indicators relating to the theme of ‘Agriculture’ which has a code of 920. Enter 920 in the search and you can find out if vegetables are worth more to the Canadian economy than fruits
+
+Note the final column, source. If you enter the fruits value ‘10009’ into the CANSIM search field you will get forwarded to a table from which the underlying indicator has been extracted
+
+
+NB This search/browse page(http://www5.statcan.gc.ca/cansim/a01?lang=eng) also has links to all tables, not just those for which there are indicators. These would need to be scraped, currently
+
+
+This is a subset of a data table with provincial breakdowns over a greater time period
+
+The CANSIM process is that you manipulate on-line the data you want and then you can download a csv. So, if, for example, all you were interested in was tonnage of pears from PEI for the years 2001-2006 (answer not much) this might be the best way to proceed
+
+However, often it is better just to download all potentially-relevant data and then do some exploratory analyses within R. This is feasible but still needs a few clicks and moving the downloaded file to the appropriate folder and then importing it into R. I know, I want the easy life
+
+Enter CANSIM2R an R package which ‘Directly Extracts Complete CANSIM Data Tables’. This was developed a couple of years ago by Marco Lugo when he was at the University of Montreal and has a couple of functions - one of which, getCANSIM(), extracts a complete CANSIM (Statistics Canada) data table and converts it into a readily usable panel (wide) format.
+
+I did not find this a particulaly useful end-product (try the vignette for an example) but the behind-the-scenes code was valuable. It was PT (Pre-Tidyverse) but works just fine. For some reason the fruit table code did not work so I substituted ….
+
+
+### Funding of Research and development expenditures in the higher education sector
+
+
+
+
+
+
+
+### CANSIM2R
+
+
+https://cran.r-project.org/web/packages/CANSIM2R/index.html
+
+
+
+https://www150.statcan.gc.ca/n1/tbl/csv/27100025-eng.zip
+
+http://www20.statcan.gc.ca/tables-tableaux/cansim/csv/
+
+
+```{r}
+library(Hmisc)
+library(utils)
+
+
+#############
+createStatCanVariables <- function(df){
+  VectorPosition <- match("Vector",names(df))
+
+  #Only create new variable if there is more than one column from StatCan
+  if(VectorPosition > 4) df$StatCanVariable <- apply(df[,c(3:(VectorPosition-1))], 1, function(x) paste(x, collapse = "; "))
+  else df$StatCanVariable <- df[,3]
+
+  return(df)
+}
+
+
+###################
+downloadCANSIM <- function(cansimTableNumber, raw = FALSE, lang = "eng"){
+  # validation of the lang parameter
+  # thanks to Professor Jean-Herman Guay (Université de Sherbrooke) for suggesting the inclusion of French data labels
+  separator = ','
+  if(lang == "eng") lang = "-eng"
+  else if(lang == "fra" || lang == "fr"){
+    lang = "-fra"
+    separator = ';'
+  } 
+  else {
+    print("Only English (eng) and French (fra) are accepted values for lang. Defaulting to English.")
+    lang = "-eng"
+  }
+  
+  temp <- tempfile() # create a temporary file to store the downloaded data
+  # create the url to download the CANSIM data according to the user's needs
+  url <- "https://www150.statcan.gc.ca/n1/en/tbl/csv/"
+  cansimTableNumber <- gsub('-', '', cansimTableNumber)
+  cansimTableNumberString <- sprintf("%08d", as.numeric(cansimTableNumber)) #Put the correct amount of leading zeroes; paste0 uses as.character which truncates leading zeroes from integers (special thanks to Soheil soheil Mahmoodzadeh for reporting the bug)
+  filename <- paste0(cansimTableNumberString, lang)
+  csv_filename <- paste0(cansimTableNumberString, ".csv")
+  url <- paste0(url, filename, ".zip")
+  
+  tryCatch(
+    {
+    download(url, temp, quiet = TRUE, mode = "wb") # from the downloader package, easily handles cross-plaform https requests, wrapper for download.file
+    },
+    error=function(err){ return(-1) },
+    warning=function(warn){ return(-1) }
+    )
+  temp_filesize <- file.info(temp)$size
+  
+  if(is.na(temp_filesize) || temp_filesize == 0) return(NA) # file is non-existent, exit prematurely
+  
+  data <- read.csv(unz(temp, csv_filename), stringsAsFactors = FALSE, sep = separator, encoding = "UTF-8")
+  unlink(temp)
+  if(raw == TRUE) return(data) #if raw equals TRUE, then the raw download is returned; functionality suggested by Soheil Mahmoodzadeh
+
+  names(data) <- iconv(names(data), to='ASCII//TRANSLIT') # remove accents from variable names
+  
+  data$DGUID <- NULL
+  data$IDENTIFICATEUR.D.UNITE.DE.MESURE <- NULL
+  data$UOM_ID <- NULL
+  data$SCALAR_FACTOR <- NULL
+  data$FACTEUR.SCALAIRE <- NULL
+  data$SCALAR_ID <- NULL
+  data$IDENTIFICATEUR.SCALAIRE <- NULL
+
+  data <- createStatCanVariables(data)
+  
+  data$VECTOR <- NULL
+  data$VECTEUR <- NULL
+  data$COORDINATES <- NULL
+  data$COORDONEES <- NULL
+
+  if(lang == '-fra') suppressWarnings(data$VALEUR <- as.numeric(data$VALEUR))
+  else               suppressWarnings(data$VALUE <- as.numeric(data$VALUE))
+
+  return(data)
+}
+
+```
+
+
+
+
+```{r}
+
+df_raw <- downloadCANSIM(00010009)
+# df_raw <- downloadCANSIM(3580162)
+
+
+df_raw %>%
+    DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = TRUE,info=FALSE))
+```
+
+
+
+```{r}
+head(df_raw)
+```
+
+
+
+
+
